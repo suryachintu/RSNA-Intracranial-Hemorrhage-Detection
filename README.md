@@ -286,17 +286,5 @@ It looks like Brain + Subdural is a good start for our models it has three chane
 ### References
 
 https://my.clevelandclinic.org/health/diseases/14480-intracranial-hemorrhage-cerebral-hemorrhage-and-hemorrhagic-stroke
-
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/suryachintu/RSNA-Intracranial-Hemorrhage-Detection/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+https://www.kaggle.com/reppic/gradient-sigmoid-windowing
+https://www.kaggle.com/jhoward/from-prototyping-to-submission-fastai
