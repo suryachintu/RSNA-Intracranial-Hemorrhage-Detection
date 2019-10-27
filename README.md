@@ -40,6 +40,8 @@ We have a train.csv containing file names and label indicating whether hemorrhag
 train_df = pd.read_csv(input_folder + 'stage_1_train.csv')
 train_df.head()
 ```
+<img src='assets/df.png'/>
+          
 It consists of two columns ID and Label. ID has a format FILE_ID_SUB_TYPE for example ID_63eb1e259_epidural so ID_63eb1e259 is file id and epidural is subtype and Label indicating whether subtype hemorrhage is present or not.
 
 Lets seperate file names and subtypes
@@ -51,7 +53,8 @@ train_df['sub_type'] = train_df['ID'].apply(lambda x: x.split('_')[-1])
 train_df['file_name'] = train_df['ID'].apply(lambda x: '_'.join(x.split('_')[:2]) + '.dcm')
 train_df.head()
 ```
-====image=====
+<img src='assets/df2.png'/>
+
 
 ```python
 train_df.shape
@@ -73,7 +76,8 @@ graph = sns.countplot(x="sub_type", hue="Label", data=(train_df))
 graph.set_xticklabels(graph.get_xticklabels(),rotation=90)
 plt.show()
 ```
-====image=====
+<img src='assets/counts.png'/>
+
 
 Lets check the counts for each subtype
 
@@ -163,7 +167,8 @@ Lets look at the dicom files in the dataset
 dicom = pydicom.read_file(path_train_img + 'ID_ffff922b9.dcm')
 print(dicom)
 ```
-====image=====
+<img src='assets/dicom.png'/>
+
 
 Dicom data format files contain pixel data of image and other meta data like patient name, instance id, window width etc...
 
@@ -173,10 +178,13 @@ Original image
 plt.imshow(dicom.pixel_array, cmap=plt.cm.bone)
 plt.show()
 ```
-====image=====
+<img src='assets/original.png'/>
+
 
 The orginal image seems to have difficult to understand, lets check meta deta features like Window Center, Window Width, Rescale Intercept, Rescale Slope 
-======image=====
+
+<img src='assets/meta.png'/>
+
 
 We can use these features to construct the new image.
 
@@ -208,7 +216,8 @@ windowed_image = get_windowed_image(dicom.pixel_array, window_center, window_wid
 plt.imshow(windowed_image, cmap=plt.cm.bone)
 plt.show()
 ```
-====image====
+<img src='assets/windowed.png'/>
+
 
 
 The windowed image using meta data is much better than the orginal image this is because the dicom pixel array which contain pixel data contain raw data in Hounsfield units (HU). 
@@ -234,7 +243,8 @@ scaled_image = get_scaled_windowed_image(windowed_image)
 plt.imshow(scaled_image, cmap=plt.cm.bone, vmin=0, vmax=255)
 plt.show()
 ```
-======image======
+<img src='assets/scaled.png'/>
+
 
 Hounsfield Units (HU) are the best source for constructing CT images. [Here](https://en.wikipedia.org/wiki/Hounsfield_scale) is detailed table showing the substance and HU range. 
 
@@ -276,15 +286,102 @@ def bsb_window(dcm):
     
 display_dicom_image('ID_0005d340e.dcm')
 ```
+<img src='assets/dicom_all.png'/>
 
-====image=====
 
 It looks like Brain + Subdural is a good start for our models it has three chaneels and cab be easily fed to any pretrained models. 
+
+
+### 4. Deep Learning Model
+
+The whole code for the training of the model can be found [here]() 
+
+We will using normal windowed images for training the model with augmentations like flip left right and random cropping.
+
+Here are steps for training the model
+
+1. Prepare train and validation data generators.
+2. Load pretrained Efficient Net B0 model.
+3. For the first epoch use all the train images for training the model with the first head layers using as it as is by setting trainable as False but train all the later images and save the model.
+4. Load the saved model and for the further epochs we train whole model except the last layer thus our model will learn most compliated features. 
+5. Make predictions.
+
+Sample code:
+
+```python
+# 1. ---------prepare data generators-------------#
+# train data generator
+data_generator_train = TrainDataGenerator(train_final_df.iloc[train_idx], 
+                                                train_final_df.iloc[train_idx], 
+                                                TRAIN_BATCH_SIZE, 
+                                                (WIDTH, HEIGHT),
+                                                augment = True)
+
+# validation data generator
+data_generator_val = TrainDataGenerator(train_final_df.iloc[valid_idx], 
+                                            train_final_df.iloc[valid_idx], 
+                                            VALID_BATCH_SIZE, 
+                                            (WIDTH, HEIGHT),
+                                            augment = False)
+# 2. ---------load efficient net B0 model-----------#
+base_model =  efn.EfficientNetB0(weights = 'imagenet', include_top = False, \
+                                 pooling = 'avg', input_shape = (HEIGHT, WIDTH, 3))
+x = base_model.output
+x = Dropout(0.125)(x)
+output_layer = Dense(6, activation = 'sigmoid')(x)
+model = Model(inputs=base_model.input, outputs=output_layer)
+model.compile(optimizer = Adam(learning_rate = 0.0001), 
+                  loss = 'binary_crossentropy',
+                  metrics = ['acc', tf.keras.metrics.AUC()])
+model.summary()
+
+# 3. ---------for 1 st epoch train on whole dataset ------------#
+for layer in model.layers[:-5]:
+    layer.trainable = False
+    
+model.compile(optimizer = Adam(learning_rate = 0.0001), 
+                  loss = 'binary_crossentropy',
+                  metrics = ['acc'])
+    
+model.fit_generator(generator = data_generator_train,
+                        validation_data = data_generator_val,
+                        epochs = 1,
+                        callbacks = callbacks_list,
+                        verbose = 1)
+
+# 4. ---------for rest of epochs train on sample data----------#
+model.load_weights('model.h5')
+model.compile(optimizer = Adam(learning_rate = 0.0004), 
+                  loss = 'binary_crossentropy',
+                  metrics = ['acc'])
+model.fit_generator(generator = data_generator_train,
+                        validation_data = data_generator_val,
+                        steps_per_epoch=len(data_generator_train)/6,
+                        epochs = 10,
+                        callbacks = callbacks_list,
+                        verbose = 1)
+# 5. --------Make Predictions ------- --------------------------#
+model.load_weights('model.h5')
+
+preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BATCH_SIZE, \
+                                                  (WIDTH, HEIGHT), path_test_img), 
+                                verbose=1)
+```
 
 
 
 ### References
 
-https://my.clevelandclinic.org/health/diseases/14480-intracranial-hemorrhage-cerebral-hemorrhage-and-hemorrhagic-stroke
+https://my.clevelandclinic.org/health/diseases/14480-intracranial-hemorrhage-cerebral-hemorrhage-and-hemorrhagic-stroke<br/>
+https://github.com/MGH-LMIC/windows_optimization<br/>
+https://arxiv.org/abs/1812.00572(Must read)
+https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/111325#latest-650043
+https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/109261#latest-651855
+
+### Kaggle Kernels
+
+https://www.kaggle.com/jhoward/some-dicom-gotchas-to-be-aware-of-fastai
 https://www.kaggle.com/reppic/gradient-sigmoid-windowing
 https://www.kaggle.com/jhoward/from-prototyping-to-submission-fastai
+https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-1
+https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-2
