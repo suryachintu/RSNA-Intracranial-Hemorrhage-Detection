@@ -374,14 +374,14 @@ preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BAT
 
 https://my.clevelandclinic.org/health/diseases/14480-intracranial-hemorrhage-cerebral-hemorrhage-and-hemorrhagic-stroke<br/>
 https://github.com/MGH-LMIC/windows_optimization<br/>
-https://arxiv.org/abs/1812.00572(Must read)
-https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/111325#latest-650043
-https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/109261#latest-651855
+https://arxiv.org/abs/1812.00572(Must read)<br/>
+https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/111325#latest-650043<br/>
+https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/109261#latest-651855<br/>
 
 ### Kaggle Kernels
 
-https://www.kaggle.com/jhoward/some-dicom-gotchas-to-be-aware-of-fastai
-https://www.kaggle.com/reppic/gradient-sigmoid-windowing
-https://www.kaggle.com/jhoward/from-prototyping-to-submission-fastai
-https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-1
-https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-2
+https://www.kaggle.com/jhoward/some-dicom-gotchas-to-be-aware-of-fastai<br/>
+https://www.kaggle.com/reppic/gradient-sigmoid-windowing<br/>
+https://www.kaggle.com/jhoward/from-prototyping-to-submission-fastai<br/>
+https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-1<br/>
+https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-2<br/>
