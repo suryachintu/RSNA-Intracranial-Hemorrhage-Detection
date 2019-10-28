@@ -294,13 +294,13 @@ It looks like Brain + Subdural is a good start for our models it has three chane
 
 ### 4. Deep Learning Model
 
-The whole code for the training of the model can be found [here]() 
+The whole code for the training of the model can be found [here](/notebooks/Effnet-B0 Windowed Image.ipynb) 
 
 We will using normal windowed images for training the model with augmentations like flip left right and random cropping.
 
 Here are steps for training the model
 
-1. Prepare train and validation data generators.
+1. Prepare train and validation data generators we will be splitting the data by stratifying the labels here id the link to [multilabel stratification](https://github.com/trent-b/iterative-stratification). We will make two splits and onlt work on the first split and check the results. 
 2. Load pretrained Efficient Net B0 model.
 3. For the first epoch use all the train images for training the model with the first head layers using as it as is by setting trainable as False but train all the later images and save the model.
 4. Load the saved model and for the further epochs we train whole model except the last layer thus our model will learn most compliated features. 
@@ -310,6 +310,17 @@ Sample code:
 
 ```python
 # 1. ---------prepare data generators-------------#
+# https://github.com/trent-b/iterative-stratification
+# Mutlilabel stratification
+splits = MultilabelStratifiedShuffleSplit(n_splits = 2, test_size = TEST_SIZE, random_state = SEED)
+file_names = train_final_df.index
+labels = train_final_df.values
+# Lets take only the first split
+split = next(splits.split(file_names, labels))
+train_idx = split[0]
+valid_idx = split[1]
+submission_predictions = []
+len(train_idx), len(valid_idx)
 # train data generator
 data_generator_train = TrainDataGenerator(train_final_df.iloc[train_idx], 
                                                 train_final_df.iloc[train_idx], 
@@ -370,18 +381,21 @@ preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BAT
 
 
 
+All notebooks can be found [here](https://github.com/suryachintu/RSNA-Intracranial-Hemorrhage-Detection/tree/master/notebooks)
+
+
 ### References
 
 https://my.clevelandclinic.org/health/diseases/14480-intracranial-hemorrhage-cerebral-hemorrhage-and-hemorrhagic-stroke<br/>
 https://github.com/MGH-LMIC/windows_optimization<br/>
-https://arxiv.org/abs/1812.00572(Must read)<br/>
-https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/111325#latest-650043<br/>
-https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/109261#latest-651855<br/>
+https://arxiv.org/abs/1812.00572(Must read)
+https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/111325#latest-650043
+https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/109261#latest-651855
 
 ### Kaggle Kernels
 
-https://www.kaggle.com/jhoward/some-dicom-gotchas-to-be-aware-of-fastai<br/>
-https://www.kaggle.com/reppic/gradient-sigmoid-windowing<br/>
-https://www.kaggle.com/jhoward/from-prototyping-to-submission-fastai<br/>
-https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-1<br/>
-https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-2<br/>
+https://www.kaggle.com/jhoward/some-dicom-gotchas-to-be-aware-of-fastai
+https://www.kaggle.com/reppic/gradient-sigmoid-windowing
+https://www.kaggle.com/jhoward/from-prototyping-to-submission-fastai
+https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-1
+https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-2
