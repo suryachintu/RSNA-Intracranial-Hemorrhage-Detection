@@ -28,6 +28,10 @@ Hemorrhage Types
 
 In this competition our goal is to predict intracranial hemorrhage and its subtypes. Given an image the we need to predict probablity of each subtype. This indicates its a multilabel classification problem.
 
+##### Evaluation Metric
+
+Competition evaluation metric is **weighted log loss** but weights for each subtype is not disclosed as part of the competition but in the discussion forms some of the teams found it out that the any label has a weight of 2 compared to other subtypes, you can check more details [here](https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/discussion/109526#latest-630190). But as part of this tutorial i'm going to use normal accuracy as evaluation metric and loss as **binary cross entropy loss** and checkpointing the models based on the loss.
+
 
 ### 2. Basic EDA 
 
