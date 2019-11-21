@@ -383,10 +383,84 @@ preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BAT
                                 verbose=1)
 print(preds.shape)
 ```
-Ouput:  471270
+
+Lets load test data frame, test data csv is also in the same format as train.csv
+
+```python
+# extract subtype
+test_df['sub_type'] = test_df['ID'].apply(lambda x: x.split('_')[-1])
+# extract filename
+test_df['file_name'] = test_df['ID'].apply(lambda x: '_'.join(x.split('_')[:2]) + '.dcm')
+
+test_df = pd.pivot_table(test_df.drop(columns='ID'), index="file_name", \
+                                columns="sub_type", values="Label")
+test_df.head()
+
+test_df.shape
+```
+
+Output: (78545, 6)
+
+So we have 78,545 test images and we need to predict 6 labels for each image. 
+
+```python
+preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BATCH_SIZE, \
+                                                  (WIDTH, HEIGHT), path_test_img), 
+                                verbose=1)
+print(preds.shape)
+```
+Output: (78545, 6)
 
 
+As per sample submission given by kaggle it is in a different format, the submission should be made with ID and Label column where ID is in the form of <b>dicomId_subType</b>(Ex:ID_0fbf6a978_subarachnoid) so we need format this to convert each prediction to 6 rows each indicating the id with sub type and its probability. The following code generates the required format for submission.
 
+```python
+def create_download_link(title = "Download CSV file", filename = "data.csv"):  
+    """
+    Helper function to generate download link to files in kaggle kernel 
+    """
+    html = '<a href={filename}>{title}</a>'
+    html = html.format(title=title,filename=filename)
+    return HTML(html)
+
+def generate_submission_file(preds):
+    from tqdm import tqdm
+
+    cols = list(train_final_df.columns)
+
+    # We have preditions for each of the image
+    # We need to make 6 rows for each of file according to the subtype
+    ids = []
+    values = []
+    for i, j in tqdm(zip(preds, test_df.index.to_list()), total=preds.shape[0]):
+    #     print(i, j)
+        # i=[any_prob, epidural_prob, intraparenchymal_prob, intraventricular_prob, subarachnoid_prob, subdural_prob]
+        # j = filename ==> ID_xyz.dcm
+        for k in range(i.shape[0]):
+            ids.append([j.replace('.dcm', '_' + cols[k])])
+            values.append(i[k])      
+
+    df = pd.DataFrame(data=ids)
+    df.head()
+
+    sample_df = pd.read_csv(input_folder + 'stage_1_sample_submission.csv')
+    sample_df.head()
+
+    df['Label'] = values
+    df.columns = sample_df.columns
+    df.head()
+
+    df.to_csv('submission.csv', index=False)
+
+    return create_download_link(filename='submission.csv')
+```
+
+```python
+df = pd.read_csv('submission.csv')
+df.head()
+```
+
+<img src='assets/sample_sub.png'/>
 
 All notebooks can be found [here](https://github.com/suryachintu/RSNA-Intracranial-Hemorrhage-Detection/tree/master/notebooks)
 
