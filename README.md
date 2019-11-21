@@ -378,11 +378,23 @@ model.fit_generator(generator = data_generator_train,
 # 5. --------Make Predictions ------- --------------------------#
 model.load_weights('model.h5')
 
-preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BATCH_SIZE, \
-                                                  (WIDTH, HEIGHT), path_test_img), 
-                                verbose=1)
-print(preds.shape)
+def get_scores(data_gen, file_name='scores.pkl'):
+    scores = model.evaluate_generator(data_gen, verbose=1)
+    joblib.dump(scores, file_name)
+    print(f"Loss: {scores[0]} and Accuracy: {scores[1]*100}")
 ```
+
+Lets predict on train and validation generators.
+
+```python
+get_scores(data_gen=data_generator_train, file_name='train_scores.pkl')
+```
+<img src='assets/train.png'/>
+
+```python
+get_scores(data_gen=data_generator_val, file_name='val_scores.pkl')
+```
+<img src='assets/val.png'/>
 
 Lets load test data frame, test data csv is also in the same format as train.csv
 
