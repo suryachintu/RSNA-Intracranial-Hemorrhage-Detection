@@ -381,7 +381,10 @@ model.load_weights('model.h5')
 preds = model.predict_generator(TestDataGenerator(test_df.index, None, VALID_BATCH_SIZE, \
                                                   (WIDTH, HEIGHT), path_test_img), 
                                 verbose=1)
+print(preds.shape)
 ```
+Ouput:  471270
+
 
 
 
