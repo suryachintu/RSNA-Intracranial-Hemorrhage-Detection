@@ -23,6 +23,7 @@ Hemorrhage Types
 4. Subarachnoid 
 5. Subdural
 6. Any
+7. Demo
 
 ##### What am i predicting?
 
@@ -475,6 +476,10 @@ df.head()
 <img src='assets/sample_sub.png'/>
 
 All notebooks can be found [here](https://github.com/suryachintu/RSNA-Intracranial-Hemorrhage-Detection/tree/master/notebooks)
+
+### 7. Demo
+
+You can test the model by uploading the DICOM file [here]('http://34.93.89.75:5325/)
 
 
 ### References
