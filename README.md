@@ -8,6 +8,7 @@ This post is divided into following parts
 2. Basic EDA [Ipython Notebook](https://www.kaggle.com/suryaparsa/rsna-basic-eda-part-1)
 3. Data Visualization & Preprocessing
 4. Deep Learning Model
+5. Demo
 
 ### 1. Overview
 
@@ -23,7 +24,6 @@ Hemorrhage Types
 4. Subarachnoid 
 5. Subdural
 6. Any
-7. Demo
 
 ##### What am i predicting?
 
@@ -477,7 +477,7 @@ df.head()
 
 All notebooks can be found [here](https://github.com/suryachintu/RSNA-Intracranial-Hemorrhage-Detection/tree/master/notebooks)
 
-### 7. Demo
+### 5. Demo
 
 You can test the model by uploading the DICOM file [here]('http://34.93.89.75:5325/)
 
