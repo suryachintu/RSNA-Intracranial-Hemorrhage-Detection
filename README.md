@@ -479,7 +479,7 @@ All notebooks can be found [here](https://github.com/suryachintu/RSNA-Intracrani
 
 ### 5. Demo
 
-You can test the model by uploading the DICOM file [here]('http://34.93.89.75:5325/)
+You can test the model by uploading the DICOM file [here](http://34.93.89.75:5325/)
 
 
 ### References
